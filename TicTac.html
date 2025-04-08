@@ -56,11 +56,13 @@ if (matches) {
   </label></br>
   <button type="button" id="submitBtn">Submit</button>
 </form>
+<div id="output"></div>
 <script>
 document.getElementById('submitBtn').addEventListener('click', () => {
   const form = document.getElementById('myForm');
   const checkboxes = form.querySelectorAll('input[type="checkbox"]');
   const jsonPayload = { board: [] };
+  const output = document.getElementById('output');
 
   // Collect checked options
   checkboxes.forEach(checkbox => {
@@ -87,6 +89,8 @@ fetch(
 		return data.json();
 	})
 	.catch(error => {
+		let checkedValues = [];
+		let reversed_arr = [];
 		console.log('Error:',error,respClone);
 		respClone.text()
 		//.then(text => console.log('Received:',text))})
@@ -95,9 +99,15 @@ fetch(
 			//console.log(obj);
 			
 			checkboxes.forEach(checkbox => {
-				checkbox.value = (obj.board ?? []).pop();
-				console.log(checkbox.value);
-			})
+				checkedValues.push((obj.board ?? []).pop());
+			});
+			//console.log(checkedValues);
+			checkboxes.forEach(checkbox => {
+				checkbox.value = checkedValues.pop();
+				reversed_arr.push(checkbox.value);
+				//console.log(checkbox.value);
+			});			
+			output.textContent = `Checked Values: ${reversed_arr.join(', ')}`;
 		})
 	})
 });
