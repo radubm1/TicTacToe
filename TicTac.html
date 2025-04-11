@@ -27,33 +27,33 @@ if (matches) {
 </head>
 <body>
 <form id="myForm">
-  <label>
+  <label>  </label>
     <input type="checkbox" name="option1" value="n">
-  </label>
-  <label>
+
+  <label>  </label>
     <input type="checkbox" name="option2" value="n">
-  </label>
-  <label>
+
+  <label>  </label>
     <input type="checkbox" name="option3" value="n">
-  </label></br>
-    <label>
+</br>
+    <label>  </label>
     <input type="checkbox" name="option4" value="n">
-  </label>
-  <label>
+
+  <label>  </label>
     <input type="checkbox" name="option5" value="n">
-  </label>
-  <label>
+
+  <label>  </label>
     <input type="checkbox" name="option6" value="n">
-  </label></br>
-    <label>
+</br>
+    <label>  </label>
     <input type="checkbox" name="option7" value="n">
-  </label>
-  <label>
+
+  <label>  </label>
     <input type="checkbox" name="option8" value="n">
-  </label>
-  <label>
+
+  <label>  </label>
     <input type="checkbox" name="option9" value="n">
-  </label></br>
+</br>
   <button type="button" id="submitBtn">Submit</button>
 </form>
 <div id="output"></div>
@@ -61,6 +61,7 @@ if (matches) {
 document.getElementById('submitBtn').addEventListener('click', () => {
   const form = document.getElementById('myForm');
   const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+  const labels = form.querySelectorAll('label');
   const jsonPayload = { board: [] };
   const output = document.getElementById('output');
 
@@ -106,8 +107,13 @@ fetch(
 				checkbox.value = checkedValues.pop();
 				reversed_arr.push(checkbox.value);
 				//console.log(checkbox.value);
-			});			
-			output.textContent = `Checked Values: ${reversed_arr.join(', ')}`;
+			});	
+			reversed_arr.reverse();			
+			//output.textContent = `Checked Values: ${reversed_arr.join(', ')}`;
+			labels.forEach(label => {
+			  //console.log(label.textContent);
+			  label.textContent=reversed_arr.pop();
+			});
 		})
 	})
 });
