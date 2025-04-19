@@ -14,7 +14,7 @@ if (matches) {
     try {
       //jsonObj = JSON.parse(jsonStr);
       //console.log(jsonObj);
-	  var stringResponse = '{"board":["o","n","n","n","x","n","n","n","n"]}';
+	  //var stringResponse = '{"board":["o","n","n","n","x","n","n","n","n"]}';
 	  objResponse = JSON.parse(jsonStr);
 	  //console.log(objResponse);
     } catch (e) {
@@ -91,28 +91,22 @@ fetch(
 	})
 	.catch(error => {
 		let checkedValues = [];
-		let reversed_arr = [];
-		console.log('Error:',error,respClone);
+		//console.log('Error:',error,respClone);
 		respClone.text()
-		//.then(text => console.log('Received:',text))})
 		.then(text => {
 			let obj = extractJSON(text);
 			//console.log(obj);
-			
-			checkboxes.forEach(checkbox => {
-				checkedValues.push((obj.board ?? []).pop());
-			});
-			//console.log(checkedValues);
+			checkedValues = (obj.board ?? []).map(x=>x);
+			console.log(checkedValues);
+			checkedValues.reverse();
 			checkboxes.forEach(checkbox => {
 				checkbox.value = checkedValues.pop();
-				reversed_arr.push(checkbox.value);
 				//console.log(checkbox.value);
-			});	
-			reversed_arr.reverse();			
-			//output.textContent = `Checked Values: ${reversed_arr.join(', ')}`;
+			});
+			(obj.board ?? []).reverse();
 			labels.forEach(label => {
 			  //console.log(label.textContent);
-			  label.textContent=reversed_arr.pop();
+			  label.textContent=(obj.board ?? []).pop();
 			});
 		})
 	})
