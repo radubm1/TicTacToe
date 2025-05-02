@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch';
-import React,{useState,useEffect} from 'react';
 import { Component } from 'react';
+import React from 'react';
 import Row from './Row';
 import GameList from './GameList';
 
@@ -16,11 +16,12 @@ function getInitialState() {
     turn: 'o',
     winner: undefined,
     gameList: gameStore,
-    board: ['o','n','n','n','n','n','n','n','n']
+    board: ['n','n','n','n','n','n','n','n','n']
   };
 }
 
-function checkWin(rows) {
+function checkWin(rows,board,app) {
+  let { setState } = app.state;
   const combos = [
     [0, 1, 2],
     [3, 4, 5],
@@ -34,11 +35,14 @@ function checkWin(rows) {
 
   const flattened = rows.reduce((acc, row) => acc.concat(row), []);
 
+  app.setState(getData(flattened));
+
   return combos.find(combo => (
     flattened[combo[0]] !== '' &&
     flattened[combo[0]] === flattened[combo[1]] &&
     flattened[combo[1]] === flattened[combo[2]]
   ));
+  
 }
 
 function getData(arr) {
@@ -46,7 +50,8 @@ function getData(arr) {
     let data={board: []};
     let respClone;
     let objResponse = null;
-    arr.map(x=>{data.board.push(x)});
+    //arr.map(x=>{data.board.push(x)});
+    arr.map((item)=>{(item=='')?data.board.push('n'):data.board.push(item)});
     console.log(data.board);
     fetch(url
       ,{
@@ -87,8 +92,8 @@ function getData(arr) {
           })
         });
   return {
-    board: data.board
-  };
+    board:data.board
+  }
 }
 
 function transformTo2DArray(arr) {
@@ -99,6 +104,20 @@ function transformTo2DArray(arr) {
     });
   //console.log(result);
   return rows;
+}
+
+function updateState(rows,board){
+  let newBoard=[];
+  let updBoard=[];
+  const oneRows = rows.reduce((acc, val) => acc.concat(val), []);
+  oneRows.map(x=>{((x=='o')||(x=='x'))?newBoard.push(x):newBoard.push('n')})
+  board.map((item,index)=>{(item!='n')?newBoard[index]=item:item});
+  newBoard.map((item,index)=>{(item!='n')?updBoard[index]=item:updBoard[index]=''});
+  let updRows = transformTo2DArray(updBoard);
+  return {
+      rows:updRows,
+      board:newBoard,
+  };  
 }
 
 class App extends Component {
@@ -119,31 +138,16 @@ class App extends Component {
 
     rows[row][square] = turn;
     turn = 'o';//turn === 'x' ? 'o' : 'x';
-    winner = checkWin(rows);
+    winner = checkWin(rows,board,this);
     
     //data = { board: ['x','n','n','n','n','n','n','o','n'] };
-        
-    const oneRows = rows.reduce((acc, val) => acc.concat(val), []);
-
-    let newBoard=[];
-
-    oneRows.map(x=>{((x=='o')||(x=='x'))?newBoard.push(x):newBoard.push('n')})
-
-    board.map((item,index)=>{(item!='n')?newBoard[index]=item:item});
-
-    let updBoard=[];
-
-    newBoard.map((item,index)=>{(item!='n')?updBoard[index]=item:updBoard[index]=''});
-
-    let updRows = transformTo2DArray(updBoard);
-
+    
     this.setState({
-      rows:updRows,
       turn,
-      winner,
-      board:newBoard
+      winner
     });
-  //console.log(board);
+    
+    //console.log(board);
   }
 
   render() {
@@ -173,11 +177,8 @@ class App extends Component {
         <div id="board">
           {rowElements}
         </div>
-        <ul>
-          {board.map((x,i)=>(<li key={i}>{x}</li>))}
-        </ul>
         <button id="reset" onClick={() => this.setState(getInitialState())}>Reset board</button>
-        <button id="get" onClick={()=> this.setState(getData(board))}>Get board</button>
+        <button id="refresh" onClick={() => this.setState(updateState(rows,board))}>Refresh board</button>
         <GameList gameList={gameList} />
       </div>
     );
