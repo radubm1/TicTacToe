@@ -2,6 +2,7 @@ import fetch from 'isomorphic-fetch';
 import { Component } from 'react';
 import React from 'react';
 import Row from './Row';
+import FetchData from './FetchData';
 import GameList from './GameList';
 
 let gameStore = [];
@@ -35,7 +36,8 @@ function checkWin(rows,board,app) {
 
   const flattened = rows.reduce((acc, row) => acc.concat(row), []);
 
-  app.setState(getData(flattened));
+  //app.setState(getData(flattened));
+  app.setState(updateState(rows,board));
 
   return combos.find(combo => (
     flattened[combo[0]] !== '' &&
@@ -43,57 +45,6 @@ function checkWin(rows,board,app) {
     flattened[combo[1]] === flattened[combo[2]]
   ));
   
-}
-
-function getData(arr) {
-    const url = 'http://localhost:8080/minimax';
-    let data={board: []};
-    let respClone;
-    let objResponse = null;
-    //arr.map(x=>{data.board.push(x)});
-    arr.map((item)=>{(item=='')?data.board.push('n'):data.board.push(item)});
-    console.log(data.board);
-    fetch(url
-      ,{
-        headers : { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(data),
-        method: "POST"
-      }
-      )
-        .then(function(response){
-          respClone = response.clone();
-		      return response.json();
-        })
-        .catch(error => {
-          respClone.text()
-          .then(function extractJSON(text) {
-            const regex = /{.*?}/g;
-            const matches = text.match(regex);
-
-            if (matches) {
-              matches.forEach(jsonStr => {
-                try {
-                  objResponse = JSON.parse(jsonStr)
-                  console.log(objResponse.board);
-                } catch ({ name, message }) {
-                    console.log(name); // "TypeError"
-                    console.log(message); // "oops"
-                }
-              });
-          }
-            return objResponse;
-          })
-          .then(function newBoard(obj) {
-            //console.log(data.board);
-            obj.board.map((item,index)=>{(data.board[index]=='n')?data.board[index]=item:item});
-          })
-        });
-  return {
-    board:data.board
-  }
 }
 
 function transformTo2DArray(arr) {
@@ -177,6 +128,7 @@ class App extends Component {
         <div id="board">
           {rowElements}
         </div>
+        <FetchData rows={rows} board={board}/>
         <button id="reset" onClick={() => this.setState(getInitialState())}>Reset board</button>
         <button id="refresh" onClick={() => this.setState(updateState(rows,board))}>Refresh board</button>
         <GameList gameList={gameList} />
