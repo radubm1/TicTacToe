@@ -1,22 +1,16 @@
-// 1. Import *useState* and *useEffect*
+// Import *useState* and *useEffect*
 import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 
 const FetchData = (props) => {
-    // 2. Create our *dogImage* variable as well as the *setDogImage* function via useState
-    // We're setting the default value of dogImage to null, so that while we wait for the
-    // fetch to complete, we dont attempt to render the image
   let { board, rows } = props;
-  //let { setState } = useState(null);
-  //let [setBoard] = useState(null)
-
-    // 3. Create out useEffect function
+    // Create out useEffect function
   useEffect(() => {
     const url = 'http://localhost:8080/minimax';
     let data={board: []};
     let respClone;
     let objResponse = null;
-    //arr.map(x=>{data.board.push(x)});
+
     const flattened = rows.reduce((acc, row) => acc.concat(row), []);
     flattened.map((item)=>{(item=='')?data.board.push('n'):data.board.push(item)});
     console.log(data.board);
@@ -58,9 +52,7 @@ const FetchData = (props) => {
             obj.board.map((item,index)=>{(data.board[index]=='n')?data.board[index]=item:item});
             return data;
           })
-        // 4. Setting *dogImage* to the image url that we received from the response above
           .then(function setBoard(data){
-
             return data.board.map((item,index)=>board[index]=item);
           })
       })

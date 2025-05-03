@@ -36,7 +36,6 @@ function checkWin(rows,board,app) {
 
   const flattened = rows.reduce((acc, row) => acc.concat(row), []);
 
-  //app.setState(getData(flattened));
   app.setState(updateState(rows,board));
 
   return combos.find(combo => (
@@ -91,13 +90,10 @@ class App extends Component {
     turn = 'o';//turn === 'x' ? 'o' : 'x';
     winner = checkWin(rows,board,this);
     
-    //data = { board: ['x','n','n','n','n','n','n','o','n'] };
-    
     this.setState({
       turn,
       winner
     });
-    
     //console.log(board);
   }
 
