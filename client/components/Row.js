@@ -2,7 +2,13 @@ import React from 'react';
 import Square from './Square';
 import PropTypes from 'prop-types';
 
-
+const handleClick = (index) => {
+  if (board[index] === '') {
+    const newBoard = [...board];
+    newBoard[index] = 'x'; // user move
+    setBoard(newBoard);
+  }
+};
 
 const Row = (props) => {
     const { letters, handleClick, row } = props;
