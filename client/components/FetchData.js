@@ -1,75 +1,60 @@
-// Import *useState* and *useEffect*
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-const FetchData = (props) => {
-  let { board, rows } = props;
-    // Create out useEffect function
+const FetchData = ({ rows }) => {
+  const [board, setBoard] = useState(() =>
+    rows.flat().map(cell => (cell === '' ? 'n' : cell))
+  );
+
   useEffect(() => {
+    const incomingBoard = rows.flat().map(cell => (cell === '' ? 'n' : cell));
+
+    // Detect new user move (difference between incoming and current board)
+    const hasNewMove = incomingBoard.some((cell, i) => {
+      return board[i] === 'n' && cell !== 'n';
+    });
+
+    if (!hasNewMove) return;
+
     const url = 'http://localhost:8080/minimax';
-    let data={board: []};
-    let respClone;
-    let objResponse = null;
+    const data = { board: incomingBoard };
 
-    const flattened = rows.reduce((acc, row) => acc.concat(row), []);
-    flattened.map((item)=>{(item=='')?data.board.push('n'):data.board.push(item)});
-    console.log(data.board);
-    fetch(url
-      ,{
-        headers : { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(data),
-        method: "POST"
-      }
-      )
-        .then(function(response){
-          respClone = response.clone();
-		      return response.json();
-        })
-        .catch(error => {
-          respClone.text()
-          .then(function extractJSON(text) {
-            const regex = /{.*?}/g;
-            const matches = text.match(regex);
-
-            if (matches) {
-              matches.forEach(jsonStr => {
-                try {
-                  objResponse = JSON.parse(jsonStr)
-                  console.log(objResponse.board);
-                } catch ({ name, message }) {
-                    console.log(name); // "TypeError"
-                    console.log(message); // "oops"
-                }
-              });
-          }
-            return objResponse;
-          })
-          .then(function newBoard(obj) {
-            //console.log(data.board);
-            obj.board.map((item,index)=>{(data.board[index]=='n')?data.board[index]=item:item});
-            return data;
-          })
-          .then(function setBoard(data){
-            return data.board.map((item,index)=>board[index]=item);
-          })
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then(response => {
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+        return response.json();
       })
-  },[rows]);
+      .then(objResponse => {
+        const newBoard = board.map((cell, i) =>
+          cell === '' || cell === 'n' ? objResponse.board[i] : cell
+        );
+        setBoard(newBoard);
+      })
+      .catch(error => {
+        console.error('Fetch error:', error.message);
+      });
+  }, [rows]);
 
   return (
     <div id="FetchData">
-        <ul>
-          {board.map((x,i)=>(<li key={i}>{x}</li>))}
-        </ul>
+      <ul>
+        {board.map((x, i) => (
+          <li key={i}>{x}</li>
+        ))}
+      </ul>
     </div>
   );
-}
+};
 
 FetchData.propTypes = {
-  board: PropTypes.arrayOf(PropTypes.string).isRequired,
-  rows: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)).isRequired
+  rows: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)).isRequired,
 };
 
 export default FetchData;
